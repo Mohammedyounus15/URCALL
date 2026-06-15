@@ -1,0 +1,495 @@
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  .site {
+    background: #060408;
+    min-height: 100vh;
+    color: #fff;
+    font-family: var(--font-sans);
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  canvas#particles {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .holo-bg {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(135deg, #0d001a, #000d1a, #001a0d, #1a000d, #0d001a);
+    background-size: 400% 400%;
+    animation: holoBG 8s ease infinite;
+    z-index: 0;
+    opacity: 0.85;
+  }
+  @keyframes holoBG {
+    0%   { background-position: 0% 50%; }
+    25%  { background-position: 100% 0%; }
+    50%  { background-position: 100% 100%; }
+    75%  { background-position: 0% 100%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* PRIME 6 HOLO TEXT */
+  .holo-text {
+    background: linear-gradient(90deg,
+      #ff0080, #ff4d00, #ffdd00, #00ff88, #00cfff, #a855f7, #ff0080, #ff4d00, #ffdd00
+    );
+    background-size: 300% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: holoShift 3s linear infinite;
+  }
+  @keyframes holoShift {
+    0%   { background-position: 0% center; }
+    100% { background-position: 300% center; }
+  }
+
+  .holo-border {
+    border: 1.5px solid transparent;
+    background-clip: padding-box;
+    position: relative;
+  }
+  .holo-border::before {
+    content: '';
+    position: absolute;
+    inset: -1.5px;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #ff0080, #ff4d00, #ffdd00, #00ff88, #00cfff, #a855f7, #ff0080);
+    background-size: 300% auto;
+    animation: holoShift 3s linear infinite;
+    z-index: -1;
+  }
+
+  nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 32px;
+    background: rgba(6,4,8,0.75);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid transparent;
+    position: relative; z-index: 10;
+    box-shadow: 0 1px 0 0 rgba(255,100,255,0.15);
+  }
+  .logo {
+    font-size: 20px; font-weight: 700; letter-spacing: 4px;
+  }
+  .nav-links { display: flex; gap: 28px; }
+  .nav-links a { font-size: 13px; color: rgba(200,180,255,0.5); text-decoration: none; transition: color 0.3s; }
+  .nav-links a:hover { color: #fff; }
+  .nav-cta {
+    padding: 8px 18px; border-radius: 6px;
+    font-size: 13px; font-weight: 600; text-decoration: none; color: #fff;
+    background: linear-gradient(90deg, #ff0080, #7c3aed, #00cfff);
+    background-size: 200% auto;
+    animation: holoShift 2s linear infinite;
+    box-shadow: 0 0 16px rgba(200,0,255,0.3);
+  }
+
+  .hero { text-align: center; padding: 100px 24px 80px; position: relative; z-index: 1; }
+  .hero-tag {
+    font-size: 11px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 24px;
+    animation: fadeDown 0.8s ease both;
+  }
+  .hero h1 {
+    font-size: clamp(36px, 5vw, 64px); font-weight: 700; line-height: 1.1; margin-bottom: 24px;
+    animation: fadeDown 0.8s ease 0.15s both;
+  }
+  .hero p {
+    font-size: 16px; color: rgba(200,180,255,0.5); max-width: 520px;
+    margin: 0 auto 36px; line-height: 1.7;
+    animation: fadeDown 0.8s ease 0.3s both;
+  }
+  .hero-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; animation: fadeDown 0.8s ease 0.45s both; }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-18px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .btn-primary {
+    padding: 12px 28px; border-radius: 7px;
+    font-size: 14px; font-weight: 600; text-decoration: none; color: #fff;
+    background: linear-gradient(90deg, #ff0080, #7c3aed, #00cfff, #ff0080);
+    background-size: 300% auto;
+    animation: holoShift 2.5s linear infinite;
+    box-shadow: 0 0 24px rgba(180,0,255,0.35);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(180,0,255,0.5); }
+  .btn-secondary {
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(200,100,255,0.3);
+    color: rgba(220,200,255,0.85); padding: 12px 24px; border-radius: 7px;
+    font-size: 14px; text-decoration: none;
+    transition: transform 0.2s, background 0.2s;
+  }
+  .btn-secondary:hover { transform: translateY(-2px); background: rgba(150,50,255,0.12); }
+
+  .ticker-wrap {
+    overflow: hidden;
+    border-top: 0.5px solid rgba(180,50,255,0.15);
+    border-bottom: 0.5px solid rgba(180,50,255,0.15);
+    padding: 14px 0; margin-bottom: 80px;
+    background: rgba(20,0,30,0.3);
+    position: relative; z-index: 1;
+  }
+  .ticker { display: flex; gap: 48px; animation: ticker 18s linear infinite; white-space: nowrap; }
+  .ticker span { font-size: 12px; color: rgba(180,100,255,0.35); letter-spacing: 1px; }
+  .ticker span b { font-weight: 500; }
+  @keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+  .section { padding: 80px 24px; max-width: 1100px; margin: 0 auto; position: relative; z-index: 1; }
+  .section-label { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 48px; }
+  .section h2 { font-size: clamp(28px, 3.5vw, 44px); font-weight: 600; line-height: 1.2; margin-bottom: 48px; }
+
+  .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  .problems { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1px; background: rgba(180,50,255,0.08); border-radius: 12px; overflow: hidden; margin-top: 48px; }
+  .problem {
+    background: rgba(10,4,18,0.85); backdrop-filter: blur(12px); padding: 32px;
+    transition: background 0.3s;
+    position: relative;
+  }
+  .problem:hover { background: rgba(20,8,35,0.9); }
+  .problem .num { font-size: 11px; letter-spacing: 2px; margin-bottom: 16px; }
+  .problem h3 { font-size: 18px; font-weight: 600; margin-bottom: 12px; color: #f0e8ff; }
+  .problem p { font-size: 14px; color: rgba(200,180,255,0.45); line-height: 1.7; }
+
+  .systems { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-top: 48px; }
+  .system-card {
+    background: rgba(10,4,20,0.6);
+    backdrop-filter: blur(14px);
+    border-radius: 12px; padding: 28px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+  }
+  .system-card::before {
+    content: '';
+    position: absolute; inset: -1px;
+    border-radius: 13px;
+    background: linear-gradient(90deg, #ff0080, #7c3aed, #00cfff, #00ff88, #ff0080);
+    background-size: 300% auto;
+    animation: holoShift 4s linear infinite;
+    z-index: -1;
+    opacity: 0.3;
+  }
+  .system-card.featured::before { opacity: 0.7; }
+  .system-card:hover { transform: translateY(-6px); }
+  .system-card:hover::before { opacity: 0.8; }
+  .system-badge { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px; }
+  .system-card h3 { font-size: 20px; font-weight: 600; margin-bottom: 8px; color: #f0e8ff; }
+  .system-card .desc { font-size: 13px; color: rgba(200,180,255,0.5); margin-bottom: 24px; line-height: 1.6; }
+  .system-card .features { list-style: none; margin-bottom: 24px; }
+  .system-card .features li { font-size: 13px; color: rgba(200,180,255,0.5); padding: 6px 0; border-bottom: 0.5px solid rgba(180,50,255,0.1); display: flex; align-items: center; gap: 8px; }
+  .system-card .features li::before { content: '—'; color: rgba(180,50,255,0.3); }
+  .system-price { font-size: 13px; color: rgba(200,180,255,0.4); }
+  .system-price b { font-size: 20px; font-weight: 600; }
+
+  .process { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 32px; margin-top: 48px; }
+  .step { transition: transform 0.3s; }
+  .step:hover { transform: translateY(-4px); }
+  .step .step-num { font-size: 11px; letter-spacing: 2px; margin-bottom: 16px; }
+  .step h3 { font-size: 16px; font-weight: 600; margin-bottom: 10px; color: #f0e8ff; }
+  .step p { font-size: 13px; color: rgba(200,180,255,0.5); line-height: 1.7; }
+
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1px; background: rgba(180,50,255,0.08); border-radius: 12px; overflow: hidden; margin-top: 48px; }
+  .stat { background: rgba(8,2,16,0.8); backdrop-filter: blur(12px); padding: 32px 24px; text-align: center; transition: background 0.3s; }
+  .stat:hover { background: rgba(20,5,35,0.85); }
+  .stat .val { font-size: 36px; font-weight: 700; margin-bottom: 8px; }
+  .stat .lbl { font-size: 12px; color: rgba(180,150,255,0.45); }
+
+  .cta-block {
+    text-align: center;
+    background: rgba(10,3,20,0.6);
+    backdrop-filter: blur(20px);
+    border-radius: 16px; padding: 80px 32px; margin: 40px 0;
+    position: relative;
+  }
+  .cta-block::before {
+    content: '';
+    position: absolute; inset: -1.5px;
+    border-radius: 17px;
+    background: linear-gradient(90deg, #ff0080, #7c3aed, #00cfff, #00ff88, #ffdd00, #ff0080);
+    background-size: 300% auto;
+    animation: holoShift 3s linear infinite;
+    z-index: -1;
+    opacity: 0.5;
+  }
+  .cta-block h2 { font-size: clamp(28px, 3.5vw, 44px); font-weight: 700; margin-bottom: 16px; }
+  .cta-block p { font-size: 15px; color: rgba(200,180,255,0.5); margin-bottom: 32px; }
+  .cta-block small { display: block; margin-top: 16px; font-size: 12px; color: rgba(180,130,255,0.3); }
+
+  footer {
+    border-top: 0.5px solid rgba(180,50,255,0.12);
+    padding: 40px 32px;
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
+    background: rgba(4,2,8,0.7);
+    backdrop-filter: blur(12px);
+    position: relative; z-index: 1;
+  }
+  .footer-logo { font-size: 16px; font-weight: 700; letter-spacing: 4px; }
+  footer p { font-size: 12px; color: rgba(160,120,255,0.35); }
+  .divider { border: none; border-top: 0.5px solid rgba(180,50,255,0.08); position: relative; z-index: 1; }
+
+  .cursor-glow {
+    position: fixed;
+    width: 350px; height: 350px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(180,0,255,0.07) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+    transform: translate(-50%, -50%);
+    transition: left 0.1s ease, top 0.1s ease;
+  }
+</style>
+
+<div class="site">
+<div class="holo-bg"></div>
+<canvas id="particles"></canvas>
+<div class="cursor-glow" id="cursorGlow"></div>
+
+<nav>
+  <div class="logo holo-text">URCALL</div>
+  <div class="nav-links">
+    <a href="#">Revenue Systems</a>
+    <a href="#">AI Voice Agents</a>
+    <a href="#">Solutions</a>
+    <a href="#">About</a>
+    <a href="#">Contact</a>
+  </div>
+  <a href="#" class="nav-cta">Book Free Audit</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-tag holo-text">Systems that outperform</div>
+  <h1 class="holo-text">Your business is<br>leaking revenue.<br>We seal it.</h1>
+  <p>AI automations, voice agents, and web solutions — engineered around your outcomes, not our deliverables.</p>
+  <div class="hero-btns">
+    <a href="#" class="btn-primary">Book a Free Audit</a>
+    <a href="#" class="btn-secondary">See Our Systems →</a>
+  </div>
+</div>
+
+<div class="ticker-wrap">
+  <div class="ticker">
+    <span>Built for <b class="holo-text">Real Estate</b></span>
+    <span>Built for <b class="holo-text">Clinics & Healthcare</b></span>
+    <span>Built for <b class="holo-text">Coaches & Consultants</b></span>
+    <span>Built for <b class="holo-text">D2C Brands</b></span>
+    <span>Built for <b class="holo-text">Legal Firms</b></span>
+    <span>Built for <b class="holo-text">E-commerce</b></span>
+    <span>Built for <b class="holo-text">SaaS Startups</b></span>
+    <span>Built for <b class="holo-text">Real Estate</b></span>
+    <span>Built for <b class="holo-text">Clinics & Healthcare</b></span>
+    <span>Built for <b class="holo-text">Coaches & Consultants</b></span>
+    <span>Built for <b class="holo-text">D2C Brands</b></span>
+    <span>Built for <b class="holo-text">Legal Firms</b></span>
+    <span>Built for <b class="holo-text">E-commerce</b></span>
+    <span>Built for <b class="holo-text">SaaS Startups</b></span>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-label holo-text reveal">The problem</div>
+  <h2 class="reveal">You're doing everything right.<br><span class="holo-text">But still losing.</span></h2>
+  <div class="problems reveal">
+    <div class="problem">
+      <div class="num holo-text">01</div>
+      <h3>Leads Going Cold</h3>
+      <p>You pay for ads. Leads come in. Nobody calls back in time. 78% of customers buy from whoever responds first — by the time you respond, the deal's already gone.</p>
+    </div>
+    <div class="problem">
+      <div class="num holo-text">02</div>
+      <h3>Too Much Manual Work</h3>
+      <p>Your team spends 20–40 hours a week on repetitive tasks. Data entry, scheduling, generating reports — that's 40 hours every week not spent on growing revenue.</p>
+    </div>
+    <div class="problem">
+      <div class="num holo-text">03</div>
+      <h3>Websites That Don't Convert</h3>
+      <p>Traffic lands on your site, looks around, and leaves. Without a clear system to capture and qualify visitors, you're losing potential revenue every day.</p>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<div class="section">
+  <div class="section-label holo-text reveal">Revenue Systems</div>
+  <h2 class="reveal">Three systems.<br><span class="holo-text">Each solves one expensive problem.</span></h2>
+  <div class="systems reveal">
+    <div class="system-card">
+      <div class="system-badge holo-text">System 1</div>
+      <h3>Revenue Capture</h3>
+      <div class="desc">Contact, qualify, and book leads in seconds.</div>
+      <ul class="features">
+        <li>AI Voice Agent (24/7)</li>
+        <li>WhatsApp & SMS Bot</li>
+        <li>Instant CRM Sync</li>
+        <li>Lead Scoring Automation</li>
+      </ul>
+      <div class="system-price">From <b class="holo-text">₹60,000</b></div>
+    </div>
+    <div class="system-card featured">
+      <div class="system-badge holo-text">System 2 · Flagship</div>
+      <h3>Ops Efficiency</h3>
+      <div class="desc">Eliminate 20–40 hours of manual tasks weekly.</div>
+      <ul class="features">
+        <li>Workflow Process Mapping</li>
+        <li>3–5 Core Automations</li>
+        <li>Custom n8n/Make Logic</li>
+        <li>Reporting Dashboard</li>
+      </ul>
+      <div class="system-price">From <b class="holo-text">₹1,00,000</b></div>
+    </div>
+    <div class="system-card">
+      <div class="system-badge holo-text">System 3</div>
+      <h3>Web Capture</h3>
+      <div class="desc">Turn passive website visitors into qualified leads.</div>
+      <ul class="features">
+        <li>High-Converting Landing Pages</li>
+        <li>Frictionless Lead Capture</li>
+        <li>Automated WhatsApp Triggers</li>
+        <li>A/B Testing Setup</li>
+      </ul>
+      <div class="system-price">From <b class="holo-text">₹50,000</b></div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<div class="section">
+  <div class="section-label holo-text reveal">Our Process</div>
+  <h2 class="reveal">From first call to live system.<br><span class="holo-text">In 2 weeks.</span></h2>
+  <div class="process reveal">
+    <div class="step"><div class="step-num holo-text">01</div><h3>We understand your business</h3><p>30-minute call. We learn your business, find where money is leaking, and decide what to build.</p></div>
+    <div class="step"><div class="step-num holo-text">02</div><h3>We scope & price it</h3><p>You get exact deliverables, timeline, and cost in writing. No surprises before we start or after.</p></div>
+    <div class="step"><div class="step-num holo-text">03</div><h3>We build it</h3><p>We handle the entire build and setup. You stay focused on your business.</p></div>
+    <div class="step"><div class="step-num holo-text">04</div><h3>Goes live. You see results.</h3><p>System goes live in 2 weeks. You see hours saved, and revenue retained within 30 days.</p></div>
+  </div>
+  <div class="stats reveal">
+    <div class="stat"><div class="val holo-text" data-target="0">0</div><div class="lbl">Lead Response Time (sec)</div></div>
+    <div class="stat"><div class="val holo-text" data-target="40">0</div><div class="lbl">Manual Hours Eliminated</div></div>
+    <div class="stat"><div class="val holo-text" data-target="3">0</div><div class="lbl">Conversion Lift (x)</div></div>
+    <div class="stat"><div class="val holo-text">Zero</div><div class="lbl">Tech Headache for You</div></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="cta-block reveal">
+    <h2 class="holo-text">Your revenue leak has a fix.<br>Let's find it.</h2>
+    <p>Book a free 30-minute strategy call. We'll show you exactly where you can automate tasks and capture more revenue.</p>
+    <div class="hero-btns">
+      <a href="#" class="btn-primary">Book Free Audit →</a>
+      <a href="#" class="btn-secondary">Explore the Solutions →</a>
+    </div>
+    <small>No obligation. No pitch. Just clarity.</small>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-logo holo-text">URCALL</div>
+  <p>AI automations, voice agents, and web systems — engineered around your outcomes.</p>
+  <p>© 2026 URCALL. All rights reserved.</p>
+</footer>
+</div>
+
+<script>
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+let W, H, particles = [];
+let hue = 0;
+
+function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+resize();
+window.addEventListener('resize', resize);
+
+function Particle() {
+  this.x = Math.random() * W;
+  this.y = Math.random() * H;
+  this.r = Math.random() * 1.8 + 0.3;
+  this.speedX = (Math.random() - 0.5) * 0.35;
+  this.speedY = (Math.random() - 0.5) * 0.35;
+  this.hue = Math.random() * 360;
+  this.alpha = Math.random() * 0.6 + 0.1;
+}
+
+for (let i = 0; i < 100; i++) particles.push(new Particle());
+
+function drawParticles() {
+  ctx.clearRect(0, 0, W, H);
+  hue = (hue + 0.5) % 360;
+  particles.forEach(p => {
+    p.hue = (p.hue + 0.8) % 360;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(${p.hue}, 100%, 65%, ${p.alpha})`;
+    ctx.fill();
+    p.x += p.speedX;
+    p.y += p.speedY;
+    if (p.x < 0 || p.x > W) p.speedX *= -1;
+    if (p.y < 0 || p.y > H) p.speedY *= -1;
+  });
+
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist < 90) {
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.strokeStyle = `hsla(${hue}, 100%, 65%, ${0.1 * (1 - dist/90)})`;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+    }
+  }
+  requestAnimationFrame(drawParticles);
+}
+drawParticles();
+
+const glow = document.getElementById('cursorGlow');
+document.addEventListener('mousemove', e => {
+  glow.style.left = e.clientX + 'px';
+  glow.style.top = e.clientY + 'px';
+});
+
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) setTimeout(() => entry.target.classList.add('visible'), i * 80);
+  });
+}, { threshold: 0.1 });
+reveals.forEach(el => observer.observe(el));
+
+let counted = false;
+const statsObserver = new IntersectionObserver(entries => {
+  if (entries[0].isIntersecting && !counted) {
+    counted = true;
+    document.querySelectorAll('.val[data-target]').forEach(el => {
+      const target = parseInt(el.getAttribute('data-target'));
+      if (target === 0) { el.textContent = '0 sec'; return; }
+      let current = 0;
+      const step = Math.ceil(target / 40);
+      const timer = setInterval(() => {
+        current = Math.min(current + step, target);
+        el.textContent = target === 3 ? current + 'x' : current + ' hrs';
+        if (current >= target) clearInterval(timer);
+      }, 40);
+    });
+  }
+}, { threshold: 0.5 });
+const statsEl = document.querySelector('.stats');
+if (statsEl) statsObserver.observe(statsEl);
+</script>
